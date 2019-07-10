@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { UserInterface } from '../../../../interfaces';
-import { ApiService } from '../../../core/services';
+import { User } from 'src/interfaces/user.interface';
+import { ApiService } from 'src/modules/core/services/api.service';
 
 @Component({
   selector: 'app-user',
@@ -10,20 +10,23 @@ import { ApiService } from '../../../core/services';
 })
 export class UserComponent implements OnInit {
 
-  user: UserInterface;
+  public user: User;
 
   constructor(private apiService: ApiService,
               private activatedRoute: ActivatedRoute,
-              private router: Router) { }
+              private router: Router,
+  ) { }
 
-  ngOnInit() {
+  ngOnInit(): void {
     const userId: number = this.activatedRoute.snapshot.params['id'];
-    this.apiService.fetchUserById(userId).subscribe((user: UserInterface) => {
-      this.user = user;
-    });
+
+    this.apiService.fetchUserById(userId)
+      .subscribe((user: User) => {
+        this.user = user;
+      });
   }
 
-  back(): void {
+  public back(): void {
     this.router.navigate(['./users']);
   }
 }

@@ -1,47 +1,40 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { PageEvent } from '@angular/material';
-import { ActivatedRoute, Router } from '@angular/router';
-import { map } from 'rxjs/operators';
-import { UserInterface } from '../../../../interfaces';
-import { ApiService } from '../../../core/services';
+import { Router } from '@angular/router';
+import { DisplayedColumnsConstant } from '../../constants/displayed-columns.constant';
+import { User } from 'src/interfaces/user.interface';
+import { Subject, Observable } from 'rxjs';
+import { UserListService } from '../../service/user-list.service';
 
 @Component({
   selector: 'app-users-list',
   templateUrl: './users-list.component.html',
   styleUrls: ['./users-list.component.css']
 })
-export class UsersListComponent implements OnInit {
+export class UsersListComponent {
 
-  displayedColumns = ['first_name', 'last_name', 'email'];
-  userList: any[] = [];
-  pagesCount: number;
+  public displayedColumns = [
+    DisplayedColumnsConstant.FirstName,
+    DisplayedColumnsConstant.LastName,
+    DisplayedColumnsConstant.Email
+  ];
+  public userList: Observable<User[]> = this.userListService.userList$;
+  public pagesCount: Observable<number> = this.userListService.pageCount$;
 
-  constructor(private activatedRoute: ActivatedRoute,
-              private router: Router) {
-  }
+  private destroyed$: Subject<void> = new Subject<void>();
 
-  ngOnInit() {
-    this.activatedRoute.data.pipe(
-      map(data => data.users)
-    )
-      .subscribe((users: UserInterface[]) => {
-        this.userList = users;
-      });
-
-    this.activatedRoute.data.pipe(
-      map(data => data.paginationInfo)
-    )
-      .subscribe(paginationInfo => {
-        this.pagesCount = paginationInfo.total;
-      })
+  constructor(private router: Router,
+              private userListService: UserListService,
+  ) {
   }
 
   pageChanged(event: PageEvent): void {
-    let page: number = event.pageIndex + 1;
+    const page: number = event.pageIndex + 1;
+
     this.router.navigate(['./'], { queryParams: { page } });
   }
 
-  userSelected(user: UserInterface): void {
+  userSelected(user: User): void {
     this.router.navigate(['./user', user.id]);
   }
 }
